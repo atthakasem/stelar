@@ -9,7 +9,6 @@ export class StateManager {
      * @param {boolean} isReactive - Whether state changes should trigger renders
      */
     constructor(component, initialState = {}, isReactive = true) {
-        console.log('is reactive', isReactive)
         this.component = component
         this._changedProps = new Set()
         this._isReactive = isReactive
