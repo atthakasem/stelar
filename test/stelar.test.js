@@ -3,7 +3,6 @@ import { vi } from 'vitest' // Use vitest's spy/mock API via compatibility layer
 import { waitForRender, nextTick } from './setup' // Import helpers
 import { Component } from '../src/stelar'
 
-// --- Test Component Definition ---
 class TestComponent extends Component {
     initialState() {
         return { count: 0, message: 'hello', user: { name: 'test' } }
