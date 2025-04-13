@@ -40,23 +40,10 @@ bun add stelar
 
 ### JavaScript
 
-**app.js:**
-
-```javascript
-import { Counter } from './counter'
-
-// Automatically initialize all elements matching the selector
-Counter.create('[data-counter]')
-
-// You can also create instances manually:
-const element = document.querySelector('[data-counter]')
-new Counter(element, { initialState: { count: 10 } }) // with optional initial state
-```
-
 **counter-example.js:**
 
 ```javascript
-import { Component } from './stelar.js'
+import { Component } from 'stelar'
 
 export class Counter extends Component {
     // Define the initial state (or set via options like above)
@@ -87,12 +74,25 @@ export class Counter extends Component {
     // Automatically render the component's UI based on state
     render() {
         this.element.innerHTML = `
-            <p>Count: <span class="count">0</span></p>
+            <p>Count: <span class="count">${this.state.count}</span></p>
             <button data-action="increment">⬆️</button>
             <button data-action="decrement">⬇️</button>
         `
     }
 }
+```
+
+**app.js:**
+
+```javascript
+import { Counter } from './counter-example'
+
+// Automatically initialize all elements matching the selector
+Counter.create('[data-counter]')
+
+// You can also create instances manually:
+const element = document.querySelector('[data-counter]')
+new Counter(element, { initialState: { count: 10 } }) // with optional initial state
 ```
 
 ## API Overview
@@ -143,57 +143,7 @@ The base class for all STELAR.js components.
 
 For components with complex rendering logic, you can optimize updates by defining `renderMap` and/or `renderProps`.
 
-```javascript
-class UserProfile extends Component {
-    initialState() {
-        return {
-            user: {
-                name: 'Anon',
-                avatar: 'default.png'
-            },
-            theme: 'light'
-        }
-    }
-
-    init() {
-        this.nameDisplay = this.element.querySelector('.user-name')
-        this.avatarImg = this.element.querySelector('.user-avatar')
-    }
-
-    // Optionally define properties that should trigger a render
-    renderProps() {
-        return ['user', 'theme']
-    }
-
-    // For a selective render instead of a full render, define functions for specific state changes
-    renderMap() {
-        return {
-            user: this.renderUserDetails, // Called if `state.user.*` changes
-            theme: this.renderTheme, // Called if `state.theme` changes
-        }
-        // If a changed property isn't in the map, the full `render()` is called.
-    }
-
-    // Selective render method for when user details have changed
-    renderUserDetails() {
-        this.nameDisplay.textContent = this.state.user.name
-        this.avatarImg.src = this.state.user.avatar
-    }
-
-    // Selective render method for when user theme has changed
-    renderTheme() {
-        this.element.dataset.theme = this.state.theme
-    }
-
-    // Full render
-    render() {
-        this.element.innerHTML = "..."
-    }
-}
-
-// Instatiate components
-UserProfile.create('.user-profile')
-```
+_Code example coming soon_
 
 - **`renderProps`**: Good for simple cases where you know only certain top-level state properties affect the UI. The entire `render()` method runs if _any_ listed prop changes.
 - **`renderMap`**: Provides more granular control. Allows specific functions to run for specific top-level property changes, potentially avoiding a full `render()`. If a changed property _isn't_ in the map, the full `render()` is called as a fallback (unless prevented by `renderProps`).
@@ -202,11 +152,11 @@ UserProfile.create('.user-profile')
 
 ### Event handling
 
-Work in progress
+_Documentation coming soon_
 
 ### Lifecycle hooks
 
-Work in progress
+_Documentation coming soon_
 
 ## License
 
