@@ -1,0 +1,53 @@
+{
+    "name": "stelar",
+    "description": "STELAR.js - Stateful Element Augmentor",
+    "version": "0.1.0",
+    "type": "module",
+    "keywords": [
+        "javascript",
+        "component",
+        "frontend",
+        "ui",
+        "dom",
+        "reactive",
+        "state management",
+        "lightweight"
+    ],
+    "author": "Thitithan Atthakasem <root@ta-soft.dev> (https://ta-soft.dev)",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/atthakasem/stelar.git"
+    },
+    "bugs": {
+        "url": "https://github.com/atthakasem/stelar/issues"
+    },
+    "homepage": "https://github.com/atthakasem/stelar#readme",
+    "module": "./dist/esm/stelar.js",
+    "exports": {
+        ".": {
+            "import": {
+                "default": "./dist/esm/stelar.js"
+            }
+        }
+    },
+    "files": [
+        "dist/",
+        "LICENSE",
+        "README.md"
+    ],
+    "scripts": {
+        "dev": "bun run --watch src/stelar.js",
+        "build": "rm -rf ./dist && bun build ./src/stelar.js --outdir ./dist --format esm --sourcemap",
+        "test": "bun test --preload ./test/setup.js",
+        "format": "prettier --write .",
+        "prepublishOnly": "bun run build && bun test"
+    },
+    "devDependencies": {
+        "@happy-dom/global-registrator": "^17.4.4",
+        "bun-types": "^1.2.9",
+        "happy-dom": "^17.4.4",
+        "prettier": "^3.5.3",
+        "vitest": "^3.1.1"
+    }
+}
