@@ -3,6 +3,8 @@
 [![NPM Version](https://img.shields.io/npm/v/stelar.svg)](https://www.npmjs.com/package/stelar)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+### WORK IN PROGRESS. Use at your own risk
+
 **STELAR.js** is a lightweight, reactive component library for building modern web applications with minimal overhead. It enhances standard HTML elements with state management, lifecycle hooks, and efficient DOM interactions, offering a simple alternative to larger frameworks.
 
 ## Key Features
