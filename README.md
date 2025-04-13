@@ -3,8 +3,6 @@
 [![NPM Version](https://img.shields.io/npm/v/stelar.svg)](https://www.npmjs.com/package/stelar)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-### WORK IN PROGRESS. Use at your own risk
-
 **STELAR.js** is a lightweight, reactive component library for building modern web applications with minimal overhead. It enhances standard HTML elements with state management, lifecycle hooks, and efficient DOM interactions, offering a simple alternative to larger frameworks.
 
 ## Key Features
@@ -141,9 +139,9 @@ The base class for all STELAR.js components.
 
 ## Advanced Usages
 
-### Selective Rendering (`renderMap` and `renderProps`)
+### Selective Rendering
 
-For components with complex rendering logic, you can optimize updates by defining `renderMap` or `renderProps`.
+For components with complex rendering logic, you can optimize updates by defining `renderMap` and/or `renderProps`.
 
 ```javascript
 class UserProfile extends Component {
@@ -201,6 +199,14 @@ UserProfile.create('.user-profile')
 - **`renderMap`**: Provides more granular control. Allows specific functions to run for specific top-level property changes, potentially avoiding a full `render()`. If a changed property _isn't_ in the map, the full `render()` is called as a fallback (unless prevented by `renderProps`).
 
 **Note:** If both `renderProps` and `renderMap` are defined, `renderProps` acts as a primary filter. If a change occurs in a property _not_ listed in `renderProps`, _no_ render action (neither `renderMap` function nor full `render()`) will occur.
+
+### Event handling
+
+Work in progress
+
+### Lifecycle hooks
+
+Work in progress
 
 ## License
 
