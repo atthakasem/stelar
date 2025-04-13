@@ -1,7 +1,7 @@
 {
     "name": "stelar",
     "description": "STELAR.js - Stateful Element Augmentor",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "type": "module",
     "keywords": [
         "javascript",
@@ -23,11 +23,11 @@
         "url": "https://github.com/atthakasem/stelar/issues"
     },
     "homepage": "https://github.com/atthakasem/stelar#readme",
-    "module": "./dist/esm/stelar.js",
+    "module": "./dist/stelar.js",
     "exports": {
         ".": {
             "import": {
-                "default": "./dist/esm/stelar.js"
+                "default": "./dist/stelar.js"
             }
         }
     },
