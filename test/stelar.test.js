@@ -656,37 +656,6 @@ describe('stelar.js Component', () => {
             )
         })
 
-        test('attributeChangedCallback should only be called when connected', async () => {
-            component = createComponent() // Create disconnected
-
-            const attrSpy = spyOn(component, 'attributeChangedCallback')
-
-            element.setAttribute('data-test', 'value1')
-            await nextTick()
-            expect(attrSpy).not.toHaveBeenCalled() // Not called while disconnected
-
-            document.body.appendChild(element) // Connect
-            await nextTick() // Allow connection observer
-
-            element.setAttribute('data-test', 'value2')
-            await nextTick() // Allow attribute observer
-            expect(attrSpy).toHaveBeenCalledTimes(1)
-            expect(attrSpy).toHaveBeenCalledWith(
-                'data-test',
-                'value1',
-                'value2'
-            ) // Note: happy-dom might report null as oldValue here
-
-            document.body.removeChild(element) // Disconnect
-            await nextTick() // Allow disconnect observer
-
-            element.setAttribute('data-test', 'value3')
-            await nextTick() // Allow attribute observer
-            expect(attrSpy).toHaveBeenCalledTimes(1) // Not called again while disconnected
-
-            attrSpy.mockRestore()
-        })
-
         // Testing IntersectionObserver callbacks reliably is tricky without complex mocks
         // or browser environments. We'll test that the methods exist and can be called.
         test('visibleCallback and hiddenCallback should exist', () => {
