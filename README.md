@@ -46,7 +46,7 @@ bun add stelar
 import { Component } from 'stelar'
 
 export class Counter extends Component {
-    // Define the initial state (or set via options like above)
+    // Define the initial state (or set via options like below in app.js)
     initialState() {
         return {
             count: 0,
