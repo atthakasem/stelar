@@ -5,7 +5,11 @@ import { Component } from '../src/stelar'
 
 class TestComponent extends Component {
     initialState() {
-        return { count: 0, message: 'hello', user: { name: 'test' } }
+        return {
+            count: 0,
+            message: 'hello',
+            user: { name: 'test', languages: ['english', 'german'] },
+        }
     }
 
     init() {
@@ -20,6 +24,7 @@ class TestComponent extends Component {
             <span class="count">${this.state.count}</span>
             <span class="message">${this.state.message}</span>
             <span class="user-name">${this.state.user.name}</span>
+            <span class="user-languages">${this.state.user.languages.join(', ')}</span>
             <button class="btn-inc">Inc</button>
             <button class="btn-dec">Dec</button>
             <button class="btn-direct">Direct</button>
@@ -231,6 +236,26 @@ describe('stelar.js Component', () => {
             expect(element.querySelector('.count').textContent).toBe('1')
         })
 
+        test('setState on nested props should trigger render by default', async () => {
+            await waitForRender() // Wait for initial render
+            expect(component.renderCalled).toBe(1)
+            component.setState({ user: { name: 'joe', languages: [] } })
+            await waitForRender()
+            expect(component.renderCalled).toBe(2)
+            expect(element.querySelector('.user-name').textContent).toBe('joe')
+        })
+
+        test('setState on nested array props should trigger render by default', async () => {
+            await waitForRender() // Wait for initial render
+            expect(component.renderCalled).toBe(1)
+            component.setState({ user: { languages: ['spanish', 'russian'] } })
+            await waitForRender()
+            expect(component.renderCalled).toBe(2)
+            expect(element.querySelector('.user-languages').textContent).toBe(
+                'spanish, russian'
+            )
+        })
+
         test('direct state mutation should trigger render by default', async () => {
             await waitForRender() // Wait for initial render
             expect(component.renderCalled).toBe(1)
@@ -238,6 +263,26 @@ describe('stelar.js Component', () => {
             await waitForRender()
             expect(component.renderCalled).toBe(2)
             expect(element.querySelector('.count').textContent).toBe('2')
+        })
+
+        test('direct nested state mutation should trigger render by default', async () => {
+            await waitForRender() // Wait for initial render
+            expect(component.renderCalled).toBe(1)
+            component.state.user.name = 'joe' // Direct mutation
+            await waitForRender()
+            expect(component.renderCalled).toBe(2)
+            expect(element.querySelector('.user-name').textContent).toBe('joe')
+        })
+
+        test('direct nested array state mutation should trigger render by default', async () => {
+            await waitForRender() // Wait for initial render
+            expect(component.renderCalled).toBe(1)
+            component.state.user.languages[1] = 'french' // Direct mutation
+            await waitForRender()
+            expect(component.renderCalled).toBe(2)
+            expect(element.querySelector('.user-languages').textContent).toBe(
+                'english, french'
+            )
         })
 
         test('direct state mutation should not trigger render if options.renderOnStateChange is false', async () => {
