@@ -216,7 +216,7 @@ describe('stelar.js Component', () => {
         })
 
         test('setState should update nested state', () => {
-            component.setState({ user: { name: 'updated' } })
+            component.setState({ user: { name: 'updated', languages: [] } })
             expect(component.state.user.name).toBe('updated')
         })
 
@@ -335,7 +335,10 @@ describe('stelar.js Component', () => {
             component.setState({ count: 5 })
             await waitForRender()
             expect(element.querySelector('.count').textContent).toBe('5')
-            component.setState({ message: 'world', user: { name: 'new' } })
+            component.setState({
+                message: 'world',
+                user: { name: 'new', languages: [] },
+            })
             await waitForRender()
             expect(element.querySelector('.message').textContent).toBe('world')
             expect(element.querySelector('.user-name').textContent).toBe('new')
@@ -404,7 +407,7 @@ describe('stelar.js Component', () => {
             // Let's modify SelectiveRenderComponent's renderProps to include 'user' to test this path.
             selectiveComp.renderProps = () => ['count', 'message', 'user'] // Override for this test
 
-            selectiveComp.setState({ user: { name: 'changed' } })
+            selectiveComp.setState({ user: { name: 'changed', languages: [] } })
             await waitForRender()
 
             expect(selectiveComp.renderCount).not.toHaveBeenCalled()
@@ -419,7 +422,10 @@ describe('stelar.js Component', () => {
         test('should call full render if multiple props change (some in map, some not)', async () => {
             selectiveComp.renderProps = () => ['count', 'message', 'user'] // Override for this test
 
-            selectiveComp.setState({ count: 10, user: { name: 'multi' } })
+            selectiveComp.setState({
+                count: 10,
+                user: { name: 'multi', languages: [] },
+            })
             await waitForRender()
 
             // Because 'user' changed and isn't in renderMap, full render is triggered
@@ -435,7 +441,7 @@ describe('stelar.js Component', () => {
 
         test('should NOT render if changed prop is NOT in renderProps', async () => {
             // renderProps is ['count', 'message'] by default in SelectiveRenderComponent
-            selectiveComp.setState({ user: { name: 'ignored' } })
+            selectiveComp.setState({ user: { name: 'ignored', languages: [] } })
             await waitForRender()
 
             expect(selectiveComp.renderCount).not.toHaveBeenCalled()
@@ -450,7 +456,7 @@ describe('stelar.js Component', () => {
             await waitForRender()
             const initialRenderCount = component.renderCalled
 
-            component.setState({ user: { name: 'rendered' } })
+            component.setState({ user: { name: 'rendered', languages: [] } })
             await waitForRender()
 
             expect(component.renderCalled).toBe(initialRenderCount + 1)
