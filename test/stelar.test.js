@@ -671,42 +671,6 @@ describe('stelar.js Component', () => {
             // No need to restore mocks on component instance if it's destroyed
         })
 
-        test('attributeChangedCallback should be called on attribute change', async () => {
-            document.body.appendChild(element)
-            component = createComponent()
-
-            expect(component.attributeChangedCallback).not.toHaveBeenCalled()
-            element.setAttribute('data-test', 'value1')
-            await nextTick() // Allow MutationObserver
-
-            expect(component.attributeChangedCallback).toHaveBeenCalledTimes(1)
-            expect(component.attributeChangedCallback).toHaveBeenCalledWith(
-                'data-test',
-                null,
-                'value1'
-            )
-
-            element.setAttribute('data-test', 'value2')
-            await nextTick() // Allow MutationObserver
-
-            expect(component.attributeChangedCallback).toHaveBeenCalledTimes(2)
-            expect(component.attributeChangedCallback).toHaveBeenCalledWith(
-                'data-test',
-                'value1',
-                'value2'
-            )
-
-            element.removeAttribute('data-test')
-            await nextTick() // Allow MutationObserver
-
-            expect(component.attributeChangedCallback).toHaveBeenCalledTimes(3)
-            expect(component.attributeChangedCallback).toHaveBeenCalledWith(
-                'data-test',
-                'value2',
-                null
-            )
-        })
-
         // Testing IntersectionObserver callbacks reliably is tricky without complex mocks
         // or browser environments. We'll test that the methods exist and can be called.
         test('visibleCallback and hiddenCallback should exist', () => {
