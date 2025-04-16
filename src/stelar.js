@@ -112,6 +112,13 @@ export class Component {
     }
 
     /**
+     * Wait until component has finished rendering
+     */
+    async waitForRender() {
+        return new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+
+    /**
      * Update component state and trigger render if needed
      * @param {Object} newState - New state to merge with existing state
      * @returns {Component} This component instance for chaining
