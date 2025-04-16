@@ -43,6 +43,9 @@ export class Component {
         // Get state from the state manager
         this.state = this.stateManager.state
 
+        // Store component element references across renders
+        this._refs = new Map()
+
         // Initialize component
         this.init()
 
@@ -77,6 +80,17 @@ export class Component {
      */
     initialState() {
         return {}
+    }
+
+    ref(id) {
+        return this._refs.get(id)
+    }
+
+    _updateRefs() {
+        this._refs = new Map()
+        this.element
+            .querySelectorAll('[data-ref]')
+            .forEach((element) => this._refs.set(element.dataset.ref, element))
     }
 
     /**
@@ -190,7 +204,7 @@ export class Component {
         // Trigger initial render only on the *first* connection
         if (this.options.renderOnCreate && !this.hasRenderedInitially) {
             this.hasRenderedInitially = true
-            this.render()
+            this.renderer.render()
         }
     }
 

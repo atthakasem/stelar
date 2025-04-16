@@ -62,7 +62,10 @@ export class Renderer {
         Array.from(changedProps).forEach((prop) => {
             const topProp = prop.split('.')[0]
             if (renderMap[topProp]) {
-                renderMap[topProp].call(this.component)
+                renderMap[topProp].el.innerHTML = renderMap[topProp].fn.call(
+                    this.component
+                )
+                this.component._updateRefs()
             }
         })
     }
@@ -71,7 +74,8 @@ export class Renderer {
      * Perform a full render of the component
      */
     render() {
-        this.component.render()
+        this.component.element.innerHTML = this.component.render()
+        this.component._updateRefs()
     }
 
     /**
