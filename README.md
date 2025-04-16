@@ -10,6 +10,7 @@
 - **DOM-Centric:** Augments existing HTML elements, integrating smoothly into server-rendered or static HTML.
 - **Reactive State:** Simple state management (`this.state`, `this.setState`) with automatic UI updates.
 - **Efficient Rendering:** Uses `requestAnimationFrame` for debounced rendering. Supports selective rendering via `renderMap` and `renderProps` for performance optimization.
+- **Element References:** Built-in reference system with `data-ref` attributes for tracking elements across renders.
 - **Lifecycle Hooks:** Comprehensive hooks including `init`, `connectedCallback`, `disconnectedCallback`, `attributeChangedCallback`, `visibleCallback`, and `hiddenCallback`.
 - **Event Handling:** Easy event listener management (`on`, `off`, `emit`) with built-in delegation support.
 - **Lightweight & Minimal:** Small footprint, focusing on core component functionalities without unnecessary abstractions.
@@ -73,7 +74,7 @@ export class Counter extends Component {
 
     // Automatically render the component's UI based on state
     render() {
-        this.element.innerHTML = `
+        return `
             <p>Count: <span class="count">${this.state.count}</span></p>
             <button data-action="increment">⬆️</button>
             <button data-action="decrement">⬇️</button>
@@ -113,6 +114,8 @@ The base class for all STELAR.js components.
 - **`render()`**: (Override) Updates the component's DOM based on `this.state`. Called automatically on creation (if `renderOnCreate`) and state changes (if `renderOnStateChange`), or manually.
 - **`renderMap()`**: (Override) Returns an object mapping state property names (top-level) to specific rendering functions (e.g., `{ count: this.renderCountDisplay }`). Used for optimized partial renders.
 - **`renderProps()`**: (Override) Returns an array of state property names (top-level). If defined, only changes to these properties (or their nested values) will trigger a render. If `null` (default), _any_ state change triggers a render check.
+- **`ref(id)`**: Returns an element with the specified `data-ref` attribute value. Useful for accessing elements reliably across renders.
+- **`waitForRender()`**: Returns a Promise that resolves after the next animation frame, ensuring any pending render has completed.
 - **`setState(newState)`**: Merges `newState` into `this.state`. Triggers a render if `renderOnStateChange` is true and state actually changed. Returns the component instance.
 - **`on(eventType, selector, handler)`**: Adds an event listener. Supports event delegation if `selector` (a CSS string) is provided. `handler` is bound to the component instance. Returns the component instance.
 - **`off(eventType, handler)`**: Removes an event listener previously added with `on`. Returns the component instance.
@@ -139,24 +142,144 @@ The base class for all STELAR.js components.
 
 ## Advanced Usages
 
+### Element Reference System
+
+The reference system allows you to reliably access elements within your component across renders:
+
+```html
+<div data-counter>
+    <input type="text" data-ref="input-field">
+    <button data-ref="submit-btn">Submit</button>
+</div>
+```
+
+In your component code:
+
+```javascript
+init() {
+    // Access references after initialization
+    this.ref('submit-btn').disabled = true;
+}
+
+someMethod() {
+    // Access the same elements later, even after re-renders
+    const value = this.ref('input-field').value;
+    this.ref('submit-btn').textContent = 'Processing...';
+}
+```
+
+References are automatically updated after each render, so you never need to manually query elements with `querySelector`.
+
 ### Selective Rendering
 
 For components with complex rendering logic, you can optimize updates by defining `renderMap` and/or `renderProps`.
 
-_Code example coming soon_
+Here's a complete Todo list example demonstrating selective rendering:
+
+```javascript
+import { Component } from 'stelar'
+
+export class Todo extends Component {
+    initialState() {
+        return {
+            todos: [],
+        }
+    }
+
+    init() {
+        this.on('submit', this.handleSubmit)
+    }
+
+    // Use a render map to selectively render changes using a specified method
+    // and only when a specific state has changed
+    renderMap() {
+        return {
+            // When `todos` state has changed, render using `this.renderListItems`
+            // onto the list element with selector `[data-ref="list"]`
+            todos: {
+                el: this.ref('list'),
+                fn: this.renderListItems,
+            },
+        }
+    }
+
+    handleSubmit(event) {
+        event.preventDefault()
+
+        // Storing a reference to an element within the component in a variable can be infeasible. When the component
+        // is re-rendered, that reference will be lost. Use `this.ref()` to track an element regardless of render cycle.
+        if (this.ref('new-todo').value.trim() === '') return
+
+        this.state.todos.push(this.ref('new-todo').value)
+
+        // No need to wait for rendering to finish before manipulating the DOM since the input field
+        // is never re-rendered thanks to the renderMap() above. Otherwise use `await this.waitForRender()`
+        this.ref('new-todo').value = ''
+        this.ref('new-todo').focus()
+    }
+
+    // Method for the (initial or otherwise) full render
+    render() {
+        return `
+            <h3>To do</h3>
+            <form action>
+                <input type="text" data-ref="new-todo">
+                <button type="submit">Add</button>
+            </form>
+            <ul data-ref="list"> <!-- Added data-ref -->
+                ${this.renderListItems()}
+            </ul>`
+    }
+
+    // Standalone method for rendering list items only
+    renderListItems() {
+        return this.state.todos.map((todo) => `<li>${todo}</li>`).join('')
+    }
+}
+```
+
+This example demonstrates:
+
+- Using `data-ref` attributes to create stable references to elements
+- Using `renderMap` to update only the list items when todos change
+- How the reference system prevents re-querying elements after renders
+
+#### Understanding Selective Rendering Options
 
 - **`renderProps`**: Good for simple cases where you know only certain top-level state properties affect the UI. The entire `render()` method runs if _any_ listed prop changes.
 - **`renderMap`**: Provides more granular control. Allows specific functions to run for specific top-level property changes, potentially avoiding a full `render()`. If a changed property _isn't_ in the map, the full `render()` is called as a fallback (unless prevented by `renderProps`).
 
 **Note:** If both `renderProps` and `renderMap` are defined, `renderProps` acts as a primary filter. If a change occurs in a property _not_ listed in `renderProps`, _no_ render action (neither `renderMap` function nor full `render()`) will occur.
 
-### Event handling
+### Working with Asynchronous Operations
 
-_Documentation coming soon_
+When working with asynchronous operations or when you need to ensure the DOM has been updated, use `waitForRender()`:
 
-### Lifecycle hooks
+```javascript
+async handleFormSubmit() {
+    // Update state
+    this.setState({ isSubmitting: true });
 
-_Documentation coming soon_
+    // Wait for the render to complete before continuing
+    await this.waitForRender();
+
+    // Now the DOM reflects the updated state
+    const formData = new FormData(this.ref('form'));
+
+    try {
+        await submitData(formData);
+        this.setState({
+            isSubmitting: false,
+            submitted: true
+        });
+    } catch (error) {
+        this.setState({
+            isSubmitting: false,
+            error: error.message
+        });
+    }
+}
+```
 
 ## License
 
