@@ -37,7 +37,7 @@
         "README.md"
     ],
     "scripts": {
-        "dev": "bun run --watch src/stelar.js",
+        "dev": "vite",
         "build": "rm -rf ./dist && bun build ./src/stelar.js --outdir ./dist --format esm --sourcemap",
         "test": "bun test --preload ./test/setup.js",
         "format": "prettier --write .",
@@ -48,6 +48,7 @@
         "bun-types": "^1.2.9",
         "happy-dom": "^17.4.4",
         "prettier": "^3.5.3",
+        "vite": "^6.3.0",
         "vitest": "^3.1.1"
     }
 }
