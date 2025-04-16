@@ -20,9 +20,9 @@ class TestComponent extends Component {
 
     render() {
         this.renderCalled = (this.renderCalled || 0) + 1
-        this.element.innerHTML = `
-            <span class="count">${this.state.count}</span>
-            <span class="message">${this.state.message}</span>
+        return `
+            <span class="count" data-ref="count">${this.state.count}</span>
+            <span class="message" data-ref="message">${this.state.message}</span>
             <span class="user-name">${this.state.user.name}</span>
             <span class="user-languages">${this.state.user.languages.join(', ')}</span>
             <button class="btn-inc">Inc</button>
@@ -52,8 +52,14 @@ class TestComponent extends Component {
 class SelectiveRenderComponent extends TestComponent {
     renderMap() {
         return {
-            count: this.renderCount,
-            message: this.renderMessage,
+            count: {
+                el: this.ref('count'),
+                fn: this.renderCount,
+            },
+            message: {
+                el: this.ref('message'),
+                fn: this.renderMessage,
+            },
         }
     }
 
@@ -62,21 +68,15 @@ class SelectiveRenderComponent extends TestComponent {
         return ['count', 'message']
     }
 
-    renderCount = vi.fn(() => {
-        const el = this.element.querySelector('.count')
-        if (el) el.textContent = this.state.count
-    })
+    renderCount = vi.fn(() => this.state.count)
 
-    renderMessage = vi.fn(() => {
-        const el = this.element.querySelector('.message')
-        if (el) el.textContent = this.state.message
-    })
+    renderMessage = vi.fn(() => this.state.message)
 
     // Override full render to track calls separately
     render = vi.fn(() => {
         this.fullRenderCalled = (this.fullRenderCalled || 0) + 1
         // Call base render logic for simplicity in test, or reimplement
-        super.render()
+        return super.render()
     })
 }
 
