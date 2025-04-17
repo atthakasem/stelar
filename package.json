@@ -38,7 +38,7 @@
     ],
     "scripts": {
         "dev": "vite",
-        "build": "rm -rf ./dist && bun build ./src/stelar.js --outdir ./dist --format esm --sourcemap",
+        "build": "rm -rf ./dist && bun build ./src/stelar.js --outdir ./dist --format=esm --minify --sourcemap=linked",
         "test": "bun test --preload ./test/setup.js",
         "format": "prettier --write .",
         "prepublishOnly": "bun run build && bun test"
