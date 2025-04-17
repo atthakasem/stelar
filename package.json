@@ -1,7 +1,7 @@
 {
     "name": "stelar",
     "description": "A lightweight, reactive component library for building modern web applications with minimal overhead",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "type": "module",
     "keywords": [
         "javascript",
