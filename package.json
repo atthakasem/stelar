@@ -1,6 +1,6 @@
 {
     "name": "stelar",
-    "description": "STELAR.js - Stateful Element Augmentor",
+    "description": "A lightweight, reactive component library for building modern web applications with minimal overhead",
     "version": "0.3.0",
     "type": "module",
     "keywords": [
