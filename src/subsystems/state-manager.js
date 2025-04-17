@@ -12,6 +12,7 @@ export class StateManager {
         this.component = component
         this._changedProps = new Set()
         this._isReactive = isReactive
+        this._proxyCache = new WeakMap()
         this._initState(initialState)
     }
 
@@ -36,9 +37,16 @@ export class StateManager {
      * @returns {Proxy} A reactive proxy of the target
      */
     _createReactiveProxy(target, path = '') {
+        if (!target || typeof target !== 'object') {
+            return target
+        }
+
+        if (this._proxyCache.has(target)) {
+            return this._proxyCache.get(target)
+        }
+
         const stateManager = this
 
-        // List of array methods that mutate the array in place
         const mutatingArrayMethods = [
             'push',
             'pop',
@@ -51,62 +59,65 @@ export class StateManager {
             'copyWithin',
         ]
 
-        return new Proxy(target, {
+        const proxy = new Proxy(target, {
             get: (target, property, receiver) => {
-                // Use Reflect.get for correct receiver behavior
+                // Special handling for symbols and non-string properties
+                if (typeof property === 'symbol' || property === '__proto__') {
+                    return Reflect.get(target, property, receiver)
+                }
+
                 const value = Reflect.get(target, property, receiver)
 
                 // Intercept calls to mutating array methods
                 if (
                     Array.isArray(target) &&
-                    typeof property === 'string' &&
                     mutatingArrayMethods.includes(property)
                 ) {
-                    // Return a wrapper function for the mutating method
                     return function (...args) {
-                        // Call the original array method on the raw target
                         const result = Array.prototype[property].apply(
                             target,
                             args
                         )
-
-                        // Trigger reactivity: Mark the array path itself as changed
                         stateManager._notifyChange(path)
-
-                        // Return the original result (e.g., pushed length, popped item)
                         return result
                     }
                 }
 
-                // Recursively proxy nested objects AND arrays
-                // Check if value is an object (includes arrays) and not null
+                // Recursively proxy nested objects
                 if (value && typeof value === 'object') {
-                    // Avoid proxying already proxied objects (though less critical with Reflect)
-                    // Construct the nested path correctly for objects and arrays
                     const nestedPath = path
                         ? `${path}.${String(property)}`
                         : String(property)
+
                     return stateManager._createReactiveProxy(value, nestedPath)
                 }
 
-                // Return primitive values or non-mutating methods directly
                 return value
             },
 
             set: (target, property, value, receiver) => {
+                // Special handling for symbols and non-string properties
+                if (typeof property === 'symbol' || property === '__proto__') {
+                    return Reflect.set(target, property, value, receiver)
+                }
+
                 const oldValue = Reflect.get(target, property, receiver)
 
-                // Prevent unnecessary updates if the value is identical
-                // Use Object.is for accurate comparison (handles NaN)
+                // Check if the new value is the same as the old one
                 if (Object.is(oldValue, value)) {
                     return true
                 }
 
-                // Perform the set operation using Reflect
+                // If value is an object, remove its proxy from cache if it exists
+                // This prevents stale proxies when replacing entire object references
+                if (oldValue && typeof oldValue === 'object') {
+                    this._proxyCache.delete(oldValue)
+                }
+
+                // Perform the actual set
                 const success = Reflect.set(target, property, value, receiver)
 
                 if (success) {
-                    // Determine the specific path that changed (e.g., 'list.0', 'user.name')
                     const changePath = path
                         ? `${path}.${String(property)}`
                         : String(property)
@@ -117,7 +128,17 @@ export class StateManager {
             },
 
             deleteProperty: (target, property) => {
+                if (typeof property === 'symbol' || property === '__proto__') {
+                    return Reflect.deleteProperty(target, property)
+                }
+
                 if (Reflect.has(target, property)) {
+                    // If we're deleting an object, remove its proxy from cache
+                    const oldValue = Reflect.get(target, property)
+                    if (oldValue && typeof oldValue === 'object') {
+                        this._proxyCache.delete(oldValue)
+                    }
+
                     const success = Reflect.deleteProperty(target, property)
                     if (success) {
                         const changePath = path
@@ -127,9 +148,14 @@ export class StateManager {
                     }
                     return success
                 }
-                return true // Property didn't exist
+                return true
             },
         })
+
+        // Store the proxy in the cache
+        this._proxyCache.set(target, proxy)
+
+        return proxy
     }
 
     /**
@@ -192,5 +218,15 @@ export class StateManager {
      */
     clearChangedProps() {
         this._changedProps.clear()
+    }
+
+    /**
+     * Clean up the proxy cache and references
+     */
+    destroy() {
+        this._proxyCache = null
+        this._rawState = null
+        this._changedProps.clear()
+        this._changedProps = null
     }
 }

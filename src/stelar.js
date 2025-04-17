@@ -259,7 +259,7 @@ export class Component {
         this.lifecycleObserver.destroy()
         this.eventManager.destroy()
         this.renderer.destroy()
-        // StateManager doesn't have explicit destroy, relies on component GC
+        this.stateManager.destroy()
 
         // Clean up element reference
         if (this.element._component === this) {
